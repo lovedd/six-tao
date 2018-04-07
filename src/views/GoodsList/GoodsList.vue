@@ -103,15 +103,35 @@
 import PageHeader from '../../components/PageHeader'
 import PageBread from '../../components/PageBread'
 import PageFooter from '../../components/PageFooter'
+import axios from 'axios'
 
 export default {
   data () {
-    return {}
+    return {
+      prdList: []
+    }
   },
   components: {
     PageHeader,
     PageBread,
     PageFooter
+  },
+  created () {
+    this.getPrdList()
+  },
+  methods: {
+    getPrdList () {
+      axios.get('mock/goods').then((res) => {
+        console.log('res', res)
+        let data = (res && res.data) || {}
+        if (data.code === '000') {
+          this.prdList = data.result || []
+          console.log('prdList', this.prdList)
+        } else {
+          alert(`err:${data.msg || '系统错误'}`)
+        }
+      })
+    }
   }
 }
 </script>
