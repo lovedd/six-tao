@@ -10,6 +10,21 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
 
+const fs = require('fs')
+const express = require('express')
+const app = express()
+
+// var goodsData = require('../mock/goods.json')
+
+var mockData = {}
+var mockFiles = fs.readdirSync(path.resolve(__dirname, '../mock'))
+mockFiles.forEach(function (val) {
+  mockData[val.split('.')[0]] = require('../mock/' + val)
+})
+
+var apiRoutes = express.Router()
+app.use('/mock', apiRoutes)
+
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
 
@@ -42,6 +57,16 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     quiet: true, // necessary for FriendlyErrorsPlugin
     watchOptions: {
       poll: config.dev.poll,
+    },
+    // before(app) {
+    //   app.get('/mock/goods', (req, res) => {
+    //     res.json(goodsData)
+    //   })
+    // }
+    before(app) {
+      app.get(/\/mock\/(\w+)/, (req, res) => {
+        res.json(mockData[RegExp.$1])
+      })
     }
   },
   plugins: [
