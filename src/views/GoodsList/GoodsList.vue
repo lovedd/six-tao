@@ -117,7 +117,7 @@ export default {
     // 请求接口获取产品列表数据
     getPrdList () {
       queryPrdObj = Object.assign(queryPrdObj, this.filterPrice, {sort: this.sortChecked})
-      axios.get('mock/goods', {params: queryPrdObj}).then((res) => {
+      axios.get('/api/goods', {params: queryPrdObj}).then((res) => {
         console.log('res', res)
         let data = (res && res.data) || {}
         if (data.code === '000') {
