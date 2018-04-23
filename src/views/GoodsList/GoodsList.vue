@@ -53,6 +53,11 @@
                 </li>
               </ul>
             </div>
+            <infinite-loading @infinite="infiniteHandler">
+              <span slot="no-more">
+                No more ...
+              </span>
+            </infinite-loading>
           </div>
         </div>
       </div>
@@ -67,6 +72,7 @@ import PageHeader from '../../components/PageHeader'
 import PageBread from '../../components/PageBread'
 import PageFooter from '../../components/PageFooter'
 import axios from 'axios'
+import InfiniteLoading from 'vue-infinite-loading'
 
 let queryPrdObj = {}
 
@@ -96,6 +102,8 @@ export default {
       filterPrice: null, // 选中的价格过滤列表对象
       isShowFilterBy: false, // 是否展示过滤列表弹窗
       isShowOverLay: false, // 是否展示遮罩层
+      page: 1,
+      pageSize: 8,
       sortChecked: 'default',
       isPriceUp: true
     }
@@ -108,23 +116,31 @@ export default {
   components: {
     PageHeader,
     PageBread,
-    PageFooter
+    PageFooter,
+    InfiniteLoading
   },
   created () {
-    this.getPrdList()
+    // this.getPrdList()
   },
   methods: {
     // 请求接口获取产品列表数据
-    getPrdList () {
-      queryPrdObj = Object.assign({}, this.filterPrice, {sort: this.sortChecked})
+    getPrdList ($state) {
+      queryPrdObj = Object.assign({}, this.filterPrice, {page: this.page, pageSize: this.pageSize, sort: this.sortChecked})
       axios.get('/api/goods', {params: queryPrdObj}).then((res) => {
         console.log('res', res)
+        this.page++
         let data = (res && res.data) || {}
         if (data.code === '000') {
-          this.prdList = data.result || []
-          console.log('prdList', this.prdList)
+          let result = data.result || {}
+          this.prdList = this.prdList.concat(result.list || [])
+          if (result.count === this.pageSize) {
+            $state.loaded()
+          } else {
+            $state.complete()
+          }
         } else {
           alert(`err:${data.msg || '系统错误'}`)
+          $state.complete()
         }
       })
     },
@@ -153,6 +169,9 @@ export default {
         this.isPriceUp = true
       }
       this.getPrdList()
+    },
+    infiniteHandler ($state) {
+      this.getPrdList($state)
     }
   }
 }
