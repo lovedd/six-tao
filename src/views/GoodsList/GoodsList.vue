@@ -53,7 +53,9 @@
                 </li>
               </ul>
             </div>
-            <infinite-loading @infinite="infiniteHandler">
+            <infinite-loading @infinite="infiniteHandler" ref="infiniteLoading">
+              <span slot="no-results">
+              </span>
               <span slot="no-more">
                 No more ...
               </span>
@@ -148,7 +150,11 @@ export default {
     checkPriceFilter (index) {
       this.priceChecked = index
       this.filterPrice = index === 'all' ? null : this.priceFilterList[index]
-      this.getPrdList()
+      this.prdList = []
+      this.page = 1
+      this.$nextTick(() => {
+        this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset')
+      })
       this.closeFilterBy()
     },
     // 展示过滤列表弹窗
@@ -168,7 +174,11 @@ export default {
       } else {
         this.isPriceUp = true
       }
-      this.getPrdList()
+      this.prdList = []
+      this.page = 1
+      this.$nextTick(() => {
+        this.$refs.infiniteLoading.$emit('$InfiniteLoading:reset')
+      })
     },
     infiniteHandler ($state) {
       this.getPrdList($state)
