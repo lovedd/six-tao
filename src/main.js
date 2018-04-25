@@ -4,6 +4,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import store from './store'
+import axios from 'axios'
 import VueLazyLoad from 'vue-lazyload'
 
 import './assets/css/base.css'
@@ -23,5 +24,19 @@ new Vue({
   router,
   store,
   components: { App },
-  template: '<App/>'
+  template: '<App/>',
+  created () {
+    this.checkLogin()
+  },
+  methods: {
+    checkLogin () {
+      axios.get('/api/users/checkLogin').then(res => {
+        let data = (res && res.data) || {}
+        if (data.code === '000') {
+          let result = data.result || {}
+          this.$store.commit('LOG_IN', {userName: result.userName})
+        }
+      })
+    }
+  }
 })

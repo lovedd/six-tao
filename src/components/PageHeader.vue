@@ -38,6 +38,7 @@
 
 <script>
 import { mapState } from 'vuex'
+import axios from 'axios'
 
 export default {
   computed: {
@@ -51,7 +52,12 @@ export default {
       this.$router.push({ path: '/login', query: { redirect: this.$route.fullPath } })
     },
     logout () {
-      this.$store.commit('LOG_OUT')
+      axios.post('/api/users/logout').then(res => {
+        let data = (res && res.data) || {}
+        if (data.code === '000') {
+          this.$store.commit('LOG_OUT')
+        }
+      })
     }
   }
 }
