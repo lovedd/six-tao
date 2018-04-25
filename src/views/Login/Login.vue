@@ -6,16 +6,20 @@
     <form action="">
       <div class="item">
         <label for="userName">账号：</label>
-        <input type="text" placeholder="Username" v-model="userName" id="userName" required="required"/>
+        <input type="text" placeholder="Username" v-model="userName" id="userName"/>
       </div>
       <div class="item">
         <label for="userPwd">密码：</label>
-        <input type="userPwd" placeholder="userPwd" v-model="userPwd" id="userPwd" required="required"/>
+        <input type="userPwd" placeholder="userPwd" v-model="userPwd" id="userPwd"/>
       </div>
-      <div class="btn-wraper">
-        <button id="loginButton" @click="login">登录</button>
+      <div class="item err-tip" v-show="errTip">
+        <label>提示：</label>
+        <span>{{errTip}}</span>
       </div>
     </form>
+    <div class="btn-wraper">
+      <button id="loginButton" @click="login">登录</button>
+    </div>
   </div>
 </template>
 
@@ -26,14 +30,17 @@ export default {
   data () {
     return {
       userName: '',
-      userPwd: ''
+      userPwd: '',
+      errTip: ''
     }
   },
   methods: {
     login () {
       if (!this.userName || !this.userPwd) {
+        this.errTip = '用户名和密码不能为空'
         return
       }
+      this.errTip = ''
       let queryObj = {
         userName: this.userName,
         userPwd: this.userPwd
@@ -42,7 +49,12 @@ export default {
         let data = (res && res.data) || {}
         if (data.code === '000') {
           let result = data.result || {}
-          alert(`${result.userName}, welcome to six-tao`)
+          this.$store.commit('LOG_IN', {userName: result.userName})
+          if (this.$route.query.redirect) {
+            this.$router.push(this.$route.query.redirect)
+          } else {
+            this.$router.push('/')
+          }
         } else {
           alert(`err:${data.msg || '系统错误'}`)
         }
@@ -83,6 +95,10 @@ export default {
   .btn-wraper {
     display: flex;
     justify-content: center;
+  }
+  .err-tip {
+    margin-top: 5px;
+    color: red;
   }
   #loginButton {
     width: 100px;
